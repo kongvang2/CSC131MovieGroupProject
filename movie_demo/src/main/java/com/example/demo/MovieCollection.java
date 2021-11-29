@@ -11,8 +11,8 @@ public class MovieCollection{
 		movieMap = new HashMap<String,Movie>();
 	}
 	
-	public void addNewMovie(Movie movie) {
-		movieMap.put(movie.getId(), movie);
+	public void addNewMovie(String id, Movie movie) {
+		movieMap.put(id, movie);
 	}
 	
 	public HashMap<String,Movie> getMovies(){

@@ -27,12 +27,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 
 @SpringBootApplication
-public class MovieDemoApplication { //implements CommandLineRunner
+public class MovieDemoApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(MovieDemoApplication.class, args);
 	}
 	/*
+	 * 
+	 * Testing
 	@Override
 	public void run(String[] args) throws IOException{
 		
