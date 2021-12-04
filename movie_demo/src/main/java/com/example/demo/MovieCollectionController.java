@@ -12,6 +12,7 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,7 +27,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 @CrossOrigin(origins = "*")
 @RequestMapping("/moviecollection")
 @RestController
-public class MovieCollectionController { //implements CommandLineRunner
+public class MovieCollectionController { 
 	
 	private MovieCollection movieCollection = new MovieCollection();
 	
@@ -67,41 +68,45 @@ public class MovieCollectionController { //implements CommandLineRunner
 		return movieCollection.getMovies();
 	}
 	
-	/* Working / Don't modify
-	@GetMapping(path = "/movies/search", produces = "application/json")
-	public HashMap<String,Movie> search(
-			@RequestParam(required = false, value="title", defaultValue="null") String titleSearch,
-			@RequestParam(required = false, value="year", defaultValue="0") int year){
-		MovieCollection searchResult = new MovieCollection();
+	@GetMapping(path = "/movies/{category}/{year}/winner")
+	public Movie getCategoryYearWinner(@PathVariable String category, @PathVariable String year) {
+		Movie returnMovie = new Movie();
+		returnMovie.setFilm("Not FOUND!");
 		
 		List<Movie> movieValue = new ArrayList<>(movieCollection.getMovies().values());
 		
 		Iterator<Movie> movie_itr = movieValue.iterator();
-		
+		boolean found = false;
 		while (movie_itr.hasNext()) {
-			Movie aMovie = movie_itr.next();
-			//System.out.print(aMovie.toString());
-			//the following search conditions will need to better organized once test/check search work
-			//maybe move them into SearchHelper.class
-			if (!titleSearch.equals("null")) {
-				if (aMovie.getTitle().toLowerCase().contains(titleSearch.toLowerCase())) {
-					searchResult.addNewMovie(aMovie);
+			found = false; //will assume movie does not match all search parameters
+			Movie aMovie = movie_itr.next();		
+			
+			if ( (aMovie.getYearCeremony().equals(year)) ) {
+				if ( (aMovie.getCategory().toLowerCase().contains(category.toLowerCase())) ) {
+					if ( aMovie.getWinner() ) {
+						found = true;
+					}
+					
 				}
 			}
 			
+			if (found) {
+				return aMovie;
+			}
+
 		}
-		
-		return searchResult.getMovies();
+		//at this point search criteria was not met
+		return returnMovie;
 		
 	}
-	*/
 	
-	/* Testing */
+	
 	
 	@GetMapping(path = "/movies/search", produces = "application/json")
 	public HashMap<String,Movie> search(
 			@RequestParam(required = false, value="title", defaultValue="null") String film,
-			@RequestParam(required = false, value="year", defaultValue="null") String year){
+			@RequestParam(required = false, value="year", defaultValue="null") String year,
+			@RequestParam(required = false, value="category", defaultValue="null") String category){
 		MovieCollection searchResult = new MovieCollection();
 		
 		List<Movie> movieValue = new ArrayList<>(movieCollection.getMovies().values());
@@ -111,26 +116,31 @@ public class MovieCollectionController { //implements CommandLineRunner
 		while (movie_itr.hasNext()) {
 			doAddMovie = true; //will assume movie matches all search parameters
 			Movie aMovie = movie_itr.next();
-			//System.out.print(aMovie.toString());
-			//the following search conditions will need to better organized once test/check search work
-			//maybe move them into SearchHelper.class
+
 			
 			if (!film.equals("null")) {
 				if ( !(aMovie.getFilm().toLowerCase().contains(film.toLowerCase())) ) {
 					doAddMovie = false; //flag
 				} //else {/*do nothing */} 
 			}
+			
 			if (!year.equals("null")) {
 				if ( !(aMovie.getYearCeremony().equals(year)) ) {
 					doAddMovie = false; //flag
 				} //else {/*Do Nothing*/}
 			}
+			
+			if (!category.equals("null")) {
+				if ( !(aMovie.getCategory().equalsIgnoreCase(category)) ) {
+					doAddMovie = false;
+				}
+			}
+			
 
 			if (doAddMovie) {
 				searchResult.addNewMovie(aMovie.getId(),aMovie);
 			}
-			
-			//SearchHelper.getSearchParameters(titleSearch, year);
+
 			doAddMovie=true;
 		}
 		return searchResult.getMovies();
