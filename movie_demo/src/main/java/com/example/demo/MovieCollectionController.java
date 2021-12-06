@@ -16,7 +16,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.example.OmdbApi.OmdbController;
+import com.example.OmdbApi.OmdbWebServiceClient;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -146,5 +149,14 @@ public class MovieCollectionController {
 		return searchResult.getMovies();
 		
 	}
+
+	//Jason: Addition to project, returns a list of titles, even if partially searched. Need to filter to just show the title + poster link
+	//NOTE: fe56eabc is the API key needed to use OMDB, do not change
+	@RequestMapping("/movies/{title}")
+    public @ResponseBody String getResponse(@PathVariable(value="title") String titles) {
+        String response = OmdbWebServiceClient.searchMovieByTitle(titles, "fe57eabc");
+        OmdbController movieList = new OmdbController(response);
+        return movieList.getJsonResponse();
+    }
 	
 }
