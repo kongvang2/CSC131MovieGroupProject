@@ -16,7 +16,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.example.OmdbApi.OmdbController;
+import com.example.OmdbApi.OmdbWebServiceClient;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,6 +70,62 @@ public class MovieCollectionController {
 	public HashMap<String,Movie> getMovieCollection() {
 		return movieCollection.getMovies();
 	}
+	
+	
+	@GetMapping(path = "/movies/year/{year}", produces = "application/json")
+	public HashMap<String,Movie> returnYearCollectionNominated(@PathVariable String year){
+		MovieCollection searchResult = new MovieCollection();
+		
+		List<Movie> movieValue = new ArrayList<>(movieCollection.getMovies().values());
+		
+		Iterator<Movie> movie_itr = movieValue.iterator();
+		boolean doAddMovie = false;
+		while (movie_itr.hasNext()) {
+			doAddMovie = false; //will assume movie does not match all search parameters
+			Movie aMovie = movie_itr.next();
+
+			if ( (aMovie.getYearCeremony().equals(year)) ) {
+				doAddMovie = true; //flag
+			} //else {/*Do Nothing*/}
+			
+			
+
+			if (doAddMovie) {
+				searchResult.addNewMovie(aMovie.getId(),aMovie);
+			}
+
+			//doAddMovie=true;
+		}
+		return searchResult.getMovies();
+		
+	}
+	
+	
+	
+	
+	
+	
+	@GetMapping(path = "/movies/{film}")
+	public Movie getMovieByTitle(@PathVariable String film) {
+		Movie returnMovie = new Movie();
+		returnMovie.setFilm("NOT FOUND!");
+		
+		List<Movie> movieValue = new ArrayList<>(movieCollection.getMovies().values());
+		
+		Iterator<Movie> movie_itr = movieValue.iterator();
+		
+		while (movie_itr.hasNext()) {
+			
+			Movie aMovie = movie_itr.next();
+			
+			if ( (aMovie.getFilm().toLowerCase().contains(film.toLowerCase())) ) {
+				return aMovie;
+			}
+		}
+		/*If we end up here then movie not found*/
+		return returnMovie;
+	}
+
 	
 	@GetMapping(path = "/movies/{category}/{year}/winner")
 	public Movie getCategoryYearWinner(@PathVariable String category, @PathVariable String year) {
@@ -141,10 +200,19 @@ public class MovieCollectionController {
 				searchResult.addNewMovie(aMovie.getId(),aMovie);
 			}
 
-			doAddMovie=true;
+			//doAddMovie=true;
 		}
 		return searchResult.getMovies();
 		
 	}
+
+	//Jason: Addition to project, returns a list of titles, even if partially searched. Need to filter to just show the title + poster link
+	//NOTE: fe56eabc is the API key needed to use OMDB, do not change
+	@RequestMapping("/movies/api/{title}")
+    public @ResponseBody String getResponse(@PathVariable(value="title") String titles) {
+        String response = OmdbWebServiceClient.searchMovieByTitle(titles, "fe57eabc");
+        OmdbController movieList = new OmdbController(response);
+        return movieList.getJsonResponse();
+    }
 	
 }
