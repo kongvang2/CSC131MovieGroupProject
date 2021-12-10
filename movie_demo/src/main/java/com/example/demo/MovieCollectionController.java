@@ -195,7 +195,8 @@ public class MovieCollectionController {
 	public HashMap<String,Movie> search(
 			@RequestParam(required = false, value="title", defaultValue="null") String film,
 			@RequestParam(required = false, value="year", defaultValue="null") String year,
-			@RequestParam(required = false, value="category", defaultValue="null") String category){
+			@RequestParam(required = false, value="category", defaultValue="null") String category,
+			@RequestParam(required = false, value="nominated", defaultValue="null") String nominated){
 		MovieCollection searchResult = new MovieCollection();
 		
 		List<Movie> movieValue = new ArrayList<>(movieCollection.getMovies().values());
@@ -221,6 +222,12 @@ public class MovieCollectionController {
 			
 			if (!category.equals("null")) {
 				if ( !(aMovie.getCategory().equalsIgnoreCase(category)) ) {
+					doAddMovie = false;
+				}
+			}
+			
+			if (!nominated.equals("null")) {
+				if ( !(aMovie.getWinner()) ) {
 					doAddMovie = false;
 				}
 			}
