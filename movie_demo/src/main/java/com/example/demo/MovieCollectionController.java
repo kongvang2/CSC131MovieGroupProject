@@ -100,6 +100,36 @@ public class MovieCollectionController {
 		
 	}
 	
+	@GetMapping(path = "/movies/year/{year}/winner", produces = "application/json")
+	public HashMap<String,Movie> returnYearWinner(@PathVariable String year){
+		MovieCollection searchResult = new MovieCollection();
+		
+		List<Movie> movieValue = new ArrayList<>(movieCollection.getMovies().values());
+		
+		Iterator<Movie> movie_itr = movieValue.iterator();
+		boolean doAddMovie = false;
+		while (movie_itr.hasNext()) {
+			doAddMovie = false; //will assume movie does not match all search parameters
+			Movie aMovie = movie_itr.next();
+
+			if ( (aMovie.getYearCeremony().equals(year)) ) {
+				if ( aMovie.getWinner() ) {
+					doAddMovie = true; //flag
+				}
+			} //else {/*Do Nothing*/}
+			
+			
+
+			if (doAddMovie) {
+				searchResult.addNewMovie(aMovie.getId(),aMovie);
+			}
+
+			//doAddMovie=true;
+		}
+		return searchResult.getMovies();
+		
+	}
+	
 	
 	
 	
